@@ -1,5 +1,5 @@
 # Cpts322_TermProject
-## Team Members:
+> ## Team Members:
 >>-Austin Marino
 >>-Joseph Cunningham
 >>-Troy Magbag
