@@ -1,0 +1,300 @@
+﻿@model TAhub.Controllers.ProfessorController.TAOptions
+@using TAhub.DB;
+<div class="container">
+    <h2 style="text-align:center;"><strong>Current TAs for <i>@Model.CourseName </i></strong></h2>
+    <hr />
+    @{
+        List<int> Ids_int = Model.TAs.Select(x => x.Id).ToList();
+        List<string> Ids = Ids_int.ConvertAll<string>(delegate (int i) { return i.ToString(); });
+        string IDs = String.Join(",", Ids);
+    }
+    <button id="message-all-btn" name="All TAs" type="button" class="message-btn btn btn-default" data-toggle="modal" data-target="#messageModal">
+        <span style="color: mediumseagreen;" class="glyphicon glyphicon-envelope"></span>
+        <strong>Message All TAs</strong>
+    </button>
+    <hr />
+    @if (Model.TAs != null && Model.TAs.Count > 0)
+    {
+        <table id="dataTable" class="table table-striped table-bordered" style="width:100%; background-color: white;">
+            <thead>
+                <tr>
+                    <th>Message</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Lab</th>
+                    <th>Schedule</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (TeachersAssistant TA in Model.TAs)
+                {
+                    <tr id="row-@TA.Id">
+                        <td>
+                            <a href="#" data-toggle="tooltip" title="Message @Html.Raw(TA.FirstName)">
+                                <span id="@TA.Id" name="@TA.FirstName @TA.LastName" style="color: mediumseagreen; font-size: 1.3em;" data-toggle="modal" data-target="#messageModal" class="message-btn glyphicon glyphicon-envelope"></span>
+                            </a>
+                        </td>
+                        <td>
+                            @Html.Raw(TA.FirstName)
+                        </td>
+                        <td>
+                            @Html.Raw(TA.LastName)
+                        </td>
+                        <td>
+                            @Html.Raw($"<a href='mailto: {TA.Email}'>{TA.Email}</a>")
+                        </td>
+                        <td>
+                            @Html.Raw("Lab: " + TA.Lab)
+                        </td>
+                        <th>
+                            <a data-toggle="tooltip" title="View @TA.FirstName's Class Schedule">
+                                <span id="@TA.Id-schedule" name="@TA.FirstName @TA.LastName" data-toggle="modal" data-target="#scheduleModal" class="schedule-btn glyphicon glyphicon-list-alt"></span>
+                            </a>
+                        </th>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Lab</th>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    }
+    else
+    {
+        <div class="well well-lg" style="font-weight: bold; text-align: center; font-size: 1.5em;">You have not added any TA's to @Model.CourseName yet.</div>
+    }
+</div>
+
+<!-- Modal -->
+<div id="messageModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h2 class="modal-title"></h2>
+            </div>
+            <div class="modal-body form-group">
+                <textarea id="message-text" rows="10" cols="100" placeholder="Enter message here..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button style="float:left" type="button" id="" class="btn btn-default send-btn">Send Message</button>
+                <button style="float:right" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="scheduleModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h2 class="modal-title"></h2>
+            </div>
+            <div class="modal-body">
+                <h2 id="loading-text"><i style="color:mediumseagreen; text-align:center;" class="fa fa-spinner fa-spin"></i> Loading Schedule...</h2>
+                <h4 style="display:none; color: firebrick; text-align: center;"></h4>
+                <table id="scheduleTable" class="table table-striped table-bordered" style="display: none; width:100%; background-color: white;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center; font-weight: bold;">Course</th>
+                            <th style="text-align: center; font-weight: bold;">Time (24-Hour)</th>
+                            <th style="text-align: center; font-weight: bold;">Days</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button style="float:right" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        //Background Image
+        $("body").css('background-image', 'url(@Url.Content("~/Images/BG_IMG_6.jpg"))');
+        InitializeDataTable();
+        //Incase an Issue has occured in the backend while processing the users request
+        var dangerText = '@Model.Notifications';
+        var checkText = dangerText.replace(/[^A-Z0-9]/ig, "");
+        if (checkText !== "") {
+            $(".alert-danger h3").text(dangerText);
+            $(".alert-danger").show();
+        }
+    });
+    $(".message-btn").click(function () {
+        var HTML_Id = this.id;
+        var Name = document.getElementById(HTML_Id).getAttribute("name");
+        var TA_Ids = "";
+        var text = "Send Message to <strong>" + Name + "</strong>";
+        $(".modal-title").html(text);
+        if (HTML_Id === "message-all-btn") {
+            TA_Ids = '@IDs';
+        }
+        else {
+            TA_Ids = HTML_Id;
+        }
+        $(".send-btn").attr("id", TA_Ids);
+        $(".send-btn").attr("name", Name);
+    });
+
+    $(".schedule-btn").on("click", function () {
+        var TA_Id = this.id.split("-")[0];
+        var Name = document.getElementById(TA_Id).getAttribute("name");
+        $("#scheduleModal .modal-title").text(Name + " Weekly Schedule");
+        var onSuccess = function (data) {
+            $("#loading-text").hide();
+            var formData = JSON.parse(data);
+            for (var i = 0; i < formData.length; i++) {
+                if (i == 0) {
+                    $("#scheduleTable tbody").html("<tr><td>" + formData[i].Course + "</td><td>" + formData[i].Time + "</td><td>" + formData[i].Days + "</td></tr>");
+                }
+                else {
+                    $("#scheduleTable tbody").append("<tr><td>" + formData[i].Course + "</td><td>" + formData[i].Time + "</td><td>" + formData[i].Days + "</td></tr>");
+                }
+                $("#scheduleTable tbody tr td").css({
+                    "background-color": "rgba(255,140,0,.8)",
+                    "color": "white"
+                });
+            }
+            $("#scheduleTable").show();
+        };
+        var onFailure = function (data) {
+            $("#loading-text").hide();
+            var message = "Unable to load students schedule...";
+            if (typeof data.responseJSON === 'string' || data.responseJSON instanceof String) {
+                message = data.responseJSON;
+            }
+            else if (typeof data === 'string' || data instanceof String) {
+                message = data;
+            }
+            $("#scheduleModal .modal-body h4").text(message);
+            $("#scheduleModal .modal-body h4").show();
+        };
+        var url = '@Url.Action(actionName: "GetTASchedule", controllerName: "Professor")';
+        var data = { "TA": TA_Id };
+        makePostRequest(data, url, onSuccess, onFailure);
+    });
+    $('#scheduleModal').on('hidden.bs.modal', function (e) {
+        $("#loading-text").show();
+        $("#scheduleModal .modal-title").text("");
+        $("#scheduleTable").hide();
+        $("#scheduleTable tbody").html(" ");
+        $("#scheduleModal .modal-body h4").hide();
+        $("#scheduleModal .modal-body h4").text(" ");
+    });
+    $(".send-btn").click(function () {
+        var TA_Id = this.id;
+        var Name = document.getElementById(TA_Id).getAttribute("name");
+        var onSuccess = function (data) {
+            $('#messageModal').modal('toggle');
+            this.id = "";
+            document.getElementById(TA_Id).name = "";
+            $("#message-text").val("");
+            $(".alert-danger").hide();
+            $(".alert-success h3").text("Successfully sent your message to " + Name).parent().show();
+        };
+        var onFailure = function (data) {
+            $('#messageModal').modal('toggle');
+            this.id = "";
+            document.getElementById(TA_Id).name = "";
+            $("#message-text").val("");
+            $(".alert-success").hide();
+            $(".alert-danger h3").text("Failed to send your message to" + Name).parent().show();
+        };
+        var message = $("#message-text").val();
+        var url = '@Url.Action(actionName: "MessageTAs", controllerName: "Professor")';
+        var data = { "TAs": TA_Id, "text": message };
+        makePostRequest(data, url, onSuccess, onFailure);
+    });
+    //Initailizes the datatable on the page
+    var InitializeDataTable = function () {
+        var id = "#dataTable";
+        $(id).DataTable({
+            responsive: true
+        });
+        $("#scheduleTable").DataTable({
+            responsive: true,
+            "paging": false,
+            "ordering": false,
+            "info": false,
+            "searching": false
+        });
+        // Setup - add a text input to each footer cell
+        $(id + ' tfoot th').each(function () {
+            var title = $(this).text();
+            if (title != "") {
+                $(this).html('<input type="text" placeholder="Search ' + title + '" />');
+            }
+        });
+        // DataTable
+        var table = $(id).DataTable();
+        // Apply the search
+        table.columns().every(function () {
+            var that = this;
+            $('input', this.footer()).on('keyup change', function () {
+                if (that.search() !== this.value) {
+                    that.search(this.value).draw();
+                }
+            });
+        });
+    };
+</script>
+<style type="text/css">
+    div.container {
+        width: 80%;
+    }
+
+    #message-all-btn, .send-btn {
+        background-color: darkorange !important;
+        color: white !important;
+        border: none !important;
+        font-weight: bold;
+        font-size: 1.3em !important;
+    }
+
+        #message-all-btn:hover, .send-btn:hover {
+            opacity: .5;
+        }
+
+    textarea {
+        display: block;
+        width: inherit;
+        margin: auto;
+        border: solid 2px lightgray;
+        font-size: 1.4em;
+    }
+
+    table {
+        text-align: center;
+    }
+
+    #message-text {
+        max-width: 80% !important;
+        border-radius: 20px;
+        border: solid 3px initial;
+        padding: 10px;
+    }
+    .glyphicon-list-alt{
+        font-size: 1.3em;
+        color: darkorange;
+        text-align: center;
+        display:block;
+        margin: auto;
+    }
+</style>

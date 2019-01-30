@@ -1,0 +1,451 @@
+﻿@using TAhub.Models
+@model TAhub.Models.TAModel
+<div class="container">
+    <h2 style="text-align:center;"><strong>Create a TA Account</strong></h2>
+    <hr />
+    @using (Html.BeginForm("Create", "TA", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <div class="form-horizontal form-body" align="center">
+            <hr class="title-bar" />
+            <!--TA's Email-->
+            <div class="form-group" align="center">
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">Email</span>
+                    @Html.EditorFor(model => model.Login.Username, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                @Html.ValidationMessageFor(model => model.Login.Username, "", new { @id = "email-validation", @class = "text-danger" })
+            </div>
+            <!--TA's Password-->
+            <div class="form-group">
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">Password</span>
+                    @Html.EditorFor(model => model.Login.Password, new { htmlAttributes = new { @class = "form-control", @type = "password" } })
+                    <span id="eye" class="input-group-addon"><span class="glyphicon glyphicon-eye-close"></span></span>
+                </div>
+                @Html.ValidationMessageFor(model => model.Login.Password, "", new { @id = "password-validation", @class = "text-danger" })
+            </div>
+            <!--TA's Student Id-->
+            <div class="form-group">
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">Student ID</span>
+                    @Html.EditorFor(model => model.StudentId, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                @Html.ValidationMessageFor(model => model.StudentId, "", new { @id = "id-validation", @class = "text-danger" })
+            </div>
+            <!--TA's First Name-->
+            <div class="form-group">
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">First Name</span>
+                    @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                @Html.ValidationMessageFor(model => model.FirstName, "", new { @id = "fName-validation", @class = "text-danger" })
+            </div>
+            <!--TA's Last Name-->
+            <div class="form-group">
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">Last Name</span>
+                    @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                @Html.ValidationMessageFor(model => model.LastName, "", new { @id = "lName-validation", @class = "text-danger" })
+            </div>
+            <!--TA's Gender-->
+            <div class="form-group">
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">Gender</span>
+                    @Html.EnumDropDownListFor(model => model.Gender, null, new { @id = "gender-dropdown", @class = "form-control" })
+                </div>
+                @Html.ValidationMessageFor(model => model.Gender, "", new { @id = "gender-validation", @class = "text-danger" })
+            </div>
+            <!--TA's Major-->
+            <div class="form-group">
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">Major</span>
+                    @Html.EnumDropDownListFor(model => model.Major, null, new { @id = "major-dropdown", @class = "form-control" })
+                </div>
+                @Html.ValidationMessageFor(model => model.Major, "", new { @id = "major-validation", @class = "text-danger" })
+            </div>
+            <!--TA's GPA-->
+            <div class="form-group">
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">GPA</span>
+                    @Html.EditorFor(model => model.GPA, new { htmlAttributes = new { @class = "form-control" } })
+                </div>
+                @Html.ValidationMessageFor(model => model.GPA, "", new { @id = "gpa-validation", @class = "text-danger" })
+            </div>
+            <!--TA's Credits-->
+            <div class="form-group">
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">Credits</span>
+                    @Html.EditorFor(model => model.Credits, new { htmlAttributes = new { @class = "form-control", @type = "number" } })
+                </div>
+                @Html.ValidationMessageFor(model => model.Credits, "", new { @id = "credits-validation", @class = "text-danger" })
+            </div>
+            <!--TA's Experience-->
+            <div class="form-group">
+                <small style="background-color: rgba(255, 255, 255, .8); color: black; font-weight: bold;">Have you ever been a TA before while at WSU?</small>
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">Experience</span>
+                    @Html.EnumDropDownListFor(model => model.HasExperience, null, new { @id = "experience-dropdown", @class = "form-control" })
+                </div>
+                @Html.ValidationMessageFor(model => model.HasExperience, "", new { @id = "experience-validation", @class = "text-danger" })
+            </div>
+            <!--TA's Class Preferences-->
+            <div class="form-group">
+                <div class="well well-sm">
+                    <h4 style="font-weight: bold;">Add Your Course Preferences</h4>
+                    <h6><strong>Term:</strong> Spring 2019</h6>
+                    <p id="remove-text">
+                        Enter a course <a href="http://www.schedules.wsu.edu/" target="_blank">SLN</a>
+                        Number and click the checkmark to add it to your course preference list.<br />
+                        <strong>Add up to 3 courses you want to TA for.</strong>
+                    </p>
+                    <table id="courses" class="table table-striped" style="display: none;">
+                        <thead>
+                            <tr><th></th><th>SLN</th><th>Course</th><th>Title</th><th></th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">SLN</span>
+                    <input id="sln" type="text" class="form-control text-box single-line" placeholder="06549" />
+                    <span id="add-btn" class="input-group-addon"><i class="glyphicon glyphicon-ok"></i></span>
+                </div>
+            </div>
+            <!--Submit Button-->
+            <div class="form-group">
+                <div class="col-md-10 input-group">
+                    <input type="submit" value="Create" class="btn btn-default create-btn" />
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script type="text/javascript">
+    $(function () {
+        //Background Image
+        $("body").css('background-image', 'url(@Url.Content("~/Images/BG_IMG_8.jpg"))');
+        //Adds an option called "Select One..." that is unclickable to all the dropdowns (select) on the page
+        $("select").append("<option selected disabled hidden>Select One...</option>");
+        //Incase an Issue has occured in the backend while processing the users request
+        var dangerText = '@Model.Notifications';
+        var checkText = dangerText.replace(/[^A-Z0-9]/ig, "");
+        if (checkText !== "") {
+            $(".alert-danger h3").text(dangerText);
+            $(".alert-danger").show();
+        }
+        validateInput();
+    });
+
+    $("#eye").click(function () {
+        var type = document.getElementById("Login_Password").getAttribute("type");
+        if (type === "password") {
+            $("#eye span").removeClass("glyphicon-eye-close").addClass("glyphicon-eye-open");
+            $("#Login_Password").attr('type', 'text');
+        } else {
+            $("#eye span").removeClass("glyphicon-eye-open").addClass("glyphicon-eye-close");
+            $("#Login_Password").attr('type', 'password');
+        }
+    });
+
+    $("#add-btn").click(function () {
+        $("#add-btn i").removeClass("glyphicon glyphicon-ok").addClass("fa fa-spinner fa-spin");
+        $("#add-btn").prop('disabled', true);
+        var SLN = $("#sln").val();
+        var onSuccess = function (data) {
+            $(".alert-danger").hide();
+            if (data.Classes[0].SectionIsLab === true) {
+                onFailure("Unable to add course with SLN '" + SLN + "' because it is a lab section and not a lecture section.");
+            }
+            else {
+                AddCourse(data);
+            }
+        };
+        var onFailure = function (data) {
+            $(document).scrollTop(0);
+            var message = "Failure to locate course with SLN: " + SLN;
+            if (typeof data === 'string' || data instanceof String) {
+                message = data;
+            }
+            $("#add-btn i").removeClass("fa fa-spinner fa-spin").addClass("glyphicon glyphicon-ok");
+            $("#add-btn").attr("disable", false);
+            $(".alert-success").hide();
+            $(".alert-danger h3").text(message).parent().show();
+        };
+        var url = "https://cors-anywhere.herokuapp.com/http://www.schedules.wsu.edu/api/ClassBySLN/20191/" + SLN;
+        makeGetRequest(url, onSuccess, onFailure);
+    });
+
+    var AddCourse = function (data) {
+        course = {
+            SLN: data.Classes[0].SLN,
+            Prefix: data.Classes[0].Prefix,
+            CourseNumber: data.Classes[0].CourseNumber,
+            EnrollmentLimit: data.Classes[0].EnrollmentLimit,
+            CourseTitle: data.Classes[0].CourseTitle,
+            Year: data.Year,
+            Term: data.Term
+        };
+        var onSuccess = function () {
+            $("#add-btn i").removeClass("fa fa-spinner fa-spin").addClass("glyphicon glyphicon-ok");
+            $("#add-btn").prop('disabled', false);
+            $("#remove-text").hide();
+            $("#courses").show();
+            $("#courses tbody").append(
+                "<tr id='course-" + course.SLN + "'>"
+                + "<td><span class='glyphicon glyphicon-education'></span></td>"
+                + "<td>" + course.SLN + "</td>"
+                + "<td>" + course.Prefix + " " + course.CourseNumber + "</td>"
+                + "<td>" + course.CourseTitle + "</td>"
+                + "<td class='remove-course'><span id='" + course.SLN + "' class='glyphicon glyphicon-remove'></span></td>"
+                + "</tr>");
+            $("#" + course.SLN).css({
+                'color': 'red',
+            });
+            $("#" + course.SLN).mouseenter(function () {
+                $(this).css("font-weight", "bold")
+            });
+            $("#" + course.SLN).mouseleave(function () {
+                $(this).css("font-weight", "normal")
+            });
+        };
+        var onFailure = function (data) {
+            $(document).scrollTop(0);
+            var responseMessage = "Failed to Add Course to Data-Base.";
+            if (data.responseJSON != "") {
+                responseMessage = data.responseJSON;
+            }
+            $(".alert-success h3").hide();
+            $(".alert-danger h3").text(responseMessage).parent().show();
+        };
+        var url = '@Url.Action("AddCoursePreference", "TA")';
+        makePostRequest(course, url, onSuccess, onFailure);
+    };
+
+    $("#courses").on("click", "span", function () {
+        var SLN = this.id;
+        var onSuccess = function (data) {
+            $("#course-" + SLN).remove();
+        };
+        var onFailure = function () {
+            $(document).scrollTop(0);
+            $(".alert-success").hide();
+            $(".alert-danger h3").text("Failed to Delete Course").parent().show();
+        };
+        var data = { "SLN": SLN };
+        var url = '@Url.Action("RemoveCoursePreference", "TA")';
+        makeDeleteRequest(data, url, onSuccess, onFailure);
+    });
+
+    //Validates all user Input to ensure they enter appropriate values for each input section
+    var validateInput = function () {
+        $(".create-btn").click(function (event) {
+            var isValid = true;
+            //Email Validation Variables
+            var email = $("#Login_Username").val();
+            var emailHtml = $("#email-validation");
+            //Password Validation Variables
+            var password = $("#Login_Password").val();
+            var passwordHtml = $("#password-validation");
+            //First Name Validation Variables
+            var fName = $("#FirstName").val();
+            var fNameHtml = $("#fName-validation");
+            //Last Name Validation Variables
+            var lName = $("#LastName").val();
+            var lNameHtml = $("#lName-validation");
+            //Student Id Validation Variables
+            var id = $("#StudentId").val();
+            var idHtml = $("#id-validation");
+            //GPA Validation Variables
+            var gpa = $("#GPA").val();
+            var gpaHtml = $("#gpa-validation");
+            //Gender Validation Variables
+            var gender = $("#gender-dropdown").val();
+            var genderHtml = $("#gender-validation");
+            //Major Validation Variables
+            var major = $("#major-dropdown").val();
+            var majorHtml = $("#major-validation");
+            //Experience Validation Variables
+            var experience = $("#experience-dropdown").val();
+            var experienceHtml = $("#experience-validation");
+            //Credits Validation Variables
+            var credits = $("#Credits").val();
+            var creditsHtml = $("#credits-validation");
+            //Sets the CSS values for the invalid input mesages displayed to the user
+            $("#email-validation, #password-validation, #fName-validation, "
+                + "#lName-validation, #id-validation, #gpa-validation, "
+                + "#gender-validation, #major-validation, #experience-validation, #credits-validation").css({
+                    "font-weight": "bold",
+                    "color": "firebrick",
+                    "background-color": "rgba(255,255,255,.7)"
+                });
+            //Email Validation Conditional
+            if (!email.includes("wsu.edu")) {
+                isValid = false;
+                emailHtml.text("Email must end with @@wsu.edu");
+            }
+            else {
+                emailHtml.text("");
+            }
+            //Password Validation Conditional
+            if (password.length < 8) {
+                isValid = false;
+                passwordHtml.text("Password must be at least 8 characters long");
+            }
+            else {
+                passwordHtml.text("");
+            }
+            //First Name Validation Conditional
+            if (fName === "") {
+                isValid = false;
+                fNameHtml.text("Your First Name must be provided");
+            }
+            else {
+                fNameHtml.text("");
+            }
+            //Last Name Validation Conditional
+            if (lName === "") {
+                isValid = false;
+                lNameHtml.text("Your Last Name must be provided");
+            }
+            else {
+                lNameHtml.text("");
+            }
+            //Student Id Validation Conditional
+            if (id.length !== 8 || parseInt(id, 10) === NaN) {
+                isValid = false;
+                idHtml.text("Student ID must be an 8 digit integer number");
+            }
+            else {
+                idHtml.text("");
+            }
+            //GPA Validation Conditional
+            var gpaNum = parseFloat(gpa);
+            if (gpa.length > 4 || gpa.length < 3 || isNaN(gpaNum) || (gpaNum > 4.0 || gpaNum < 0.0)) {
+                isValid = false;
+                gpaHtml.text("GPA must be in decimal format and greater than or equal to 0.0 but no larger that 4.0");
+            }
+            else {
+                gpaHtml.text("");
+            }
+            //Gender Validation Conditional
+            if (gender === null) {
+                isValid = false;
+                genderHtml.text("Please select an option from the drop down");
+            }
+            else {
+                genderHtml.text("");
+            }
+            //Major Validation Conditional
+            if (major === null) {
+                isValid = false;
+                majorHtml.text("Please select an option from the drop down");
+            }
+            else {
+                majorHtml.text("");
+            }
+            //Experience Validation Conditional
+            if (experience === null) {
+                isValid = false;
+                experienceHtml.text("Please select an option from the drop down");
+            }
+            else {
+                experienceHtml.text("");
+            }
+            //Credits Validation Conditional
+            var credsNum = parseFloat(credits);
+            if (credsNum <= 0) {
+                isValid = false;
+                creditsHtml.text("Please insert a positive number.");
+            }
+            else {
+                creditsHtml.text("");
+            }
+            //If any of the above inputs had an invalid value entered, this conditional is triggered
+            if (!isValid) {
+                //Prevents the submit button from "Submitting" the form as it was intended to do
+                event.preventDefault();
+            }
+        })
+    };
+</script>
+<style type="text/css">
+    .title-bar {
+        display: block;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        margin-left: auto;
+        margin-right: auto;
+        border-style: solid;
+        border-width: 3px;
+        border-color: darkorange;
+    }
+    .form-body {
+        margin: auto;
+        width: 60%;
+    }
+    .form-group {
+        margin: 20px auto;
+        width: 50%;
+    }
+    @@media only screen and (max-width: 1000px) {
+        .form-group {
+            width: 80%;
+        }
+        .title-bar {
+            width: 100%;
+        }
+    }
+    @@media only screen and (max-width: 420px) {
+        .input-group-addon {
+            width: 32% !important;
+            font-size: .9em;
+        }
+        #eye {
+            font-size: .9em !important;
+            width: 10% !important;
+        }
+        .form-horizontal {
+            width: 100% !important;
+        }
+        .form-group {
+            width: 100% !important;
+            margin: auto !important;
+            padding: 5px !important;
+        }
+    }
+    .input-group {
+        width: 100%;
+        margin: auto;
+    }
+    .input-group .input-group-addon {
+        width: 30%;
+    }
+    /*Create Button*/
+    .create-btn {
+        width: 40%;
+        background-color: darkorange;
+        color: white;
+        border: none;
+        font-weight: bold;
+        font-size: 1.3em;
+    }
+    /*Create Button*/
+    .create-btn:hover {
+        opacity: .5;
+        background-color: darkorange;
+    }
+    #add-btn {
+        background-color: mediumseagreen !important;
+        color: white !important;
+        border: none !important;
+    }
+    #add-btn:hover {
+        opacity: .5;
+    }
+    #eye {
+        font-size: 1.2em;
+        width: 10% !important;
+    }
+</style>

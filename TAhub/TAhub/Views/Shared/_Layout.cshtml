@@ -1,0 +1,234 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Where TAs and Professors go to connect">
+    <meta name="keywords" content="TA,Hub,TAhub,TA hub, wsu, washington state university, wazzu">
+    <meta name="author" content="Austin marino, Joseph Cunningham, Brandon Somers">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAhub</title>
+    <link rel="shortcut icon" href="@Url.Content("~/favicon.ico")">
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <!--Font Awesome CDN-->
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.5.0/css/all.css' integrity='sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU' crossorigin='anonymous'>
+    <!--Data Tables CDN-->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/rowreorder/1.2.5/css/rowReorder.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" />
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/rowreorder/1.2.5/js/dataTables.rowReorder.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-inverse navbar-fixed-top" style="display:none;">
+            <div class="container-fluid">
+                @{ 
+                    //This code block checks if their is a Professor or TA account that has been cached and grabs their basic info if they are
+                    //These values set in the block are used to determine what navbar the user will be displayed and what routes they will be sent to
+                    TAhub.Models.TAModel TA = TAhub.Models.Cache.GetUser<TAhub.Models.TAModel>();
+                    TAhub.Models.ProfessorModel Prof = TAhub.Models.Cache.GetUser<TAhub.Models.ProfessorModel>();
+                    string user = String.Empty;
+                    string userName = String.Empty;
+                    TAhub.Models.UserType userType = TAhub.Models.UserType.Student;
+                    if (TA != null)
+                    {
+                        userType = TAhub.Models.UserType.TA;
+                        user = "TA";
+                        userName = TA.FirstName;
+                    }
+                    else if(Prof != null)
+                    {
+                        userType = TAhub.Models.UserType.Professor;
+                        user = "Professor";
+                        userName = Prof.FirstName;
+                    }
+                }
+                @if (!String.IsNullOrWhiteSpace(user))
+                {
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        @Html.ActionLink("Home", "Index", user, null, new { @class = "navbar-brand" })
+                    </div>
+                    <div class="collapse navbar-collapse" id="myNavbar">
+                        <ul class="nav navbar-nav navbar-left">
+                            <li>@Html.ActionLink("Home", "Index", user, null, new { @class = "btn btn-default" })</li>
+                            @if (user == "TA")
+                            {
+                                <li>@Html.ActionLink("Messages", "Messages", user, null, new { @class = "btn btn-default" })</li>
+                            }
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li>
+                                <a href="#" id="account-options" title="<h4 style='font-weight: bold;'>Account Options</h4>" class="nav-btn-right btn btn-primary"
+                                   data-toggle="popover" data-trigger="focus" data-placement="bottom"
+                                   data-content="" data-html="true">
+                                    <i class="glyphicon glyphicon-user"></i> @userName
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        @Html.ActionLink("Home", "Index", "Home", null, new { @class = "navbar-brand" })
+                    </div>
+                    <div class="collapse navbar-collapse" id="myNavbar">
+                        <ul class="nav navbar-nav navbar-left">
+                            <li>@Html.ActionLink("Home", "Index", "Home", null, new { @class = "btn btn-default" })</li>
+                            <li>@Html.ActionLink("About", "About", "Home", null, new { @class = "btn btn-default" })</li>
+                            <li>@Html.ActionLink("Contact", "Contact", "TA", null, new { @class = "btn btn-default" })</li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><a href="@Url.Action("Login", "Home", null)" class="btn btn-default"> <span class="glyphicon glyphicon-log-in"></span>&nbsp;Login</a></li>
+                        </ul>
+                    </div>
+                }
+            </div>
+        </nav>
+        <div class="alert-messages">
+            <div class="alert alert-success" style="display: none; width: 60%; text-align: center; margin: auto; padding: 0px;">
+                <h3 class="success-text" style="margin: auto; padding: 10px; font-weight: bold;"></h3>
+            </div>
+            <div class="alert alert-danger" style="display: none; width: 60%; text-align: center; margin: auto; padding: 0px;">
+                <h3 class="danger-text" style="margin: auto; padding: 10px; font-weight: bold;"></h3>
+            </div>
+        </div>
+    </header>
+    <div class="body-content" style="display: none;">
+        @RenderBody()
+        <hr />
+        <footer>
+            <h3 style="color: dimgrey; font-weight: bold; width: 200px; text-align:left;">&#169; TAhub @DateTime.Now.Year</h3>
+        </footer>
+    </div>
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+<script type="text/javascript">
+    //When all HTML and CSS attributes/elements have successfully been loaded
+    $(window).on("load", function () {
+        $(".navbar").show();
+        $(".body-content").show();
+    });
+    $(function () {
+        //Toggles
+        $('[data-toggle="tooltip"]').tooltip();
+        $('[data-toggle="popover"]').popover();
+        //Navbar Code
+        $('#account-options').attr(
+            "data-content",
+            '<div>' +
+                '<div id="account-details-container"><span style="text-align: left;" class="fas fa-user-cog"></span>' +
+                '@Html.ActionLink("Account", "AccountDetails", "Home", new { user = userType },
+                 new { @style= "text-align: center; border:none !important; text-decoration:none !important; font-size:1em !important; color:black !important; background:none !important;" })' +
+                '</div>' + '<hr></hr>' +
+                '<div id="sign-out-container"><span style="text-align: left;" class="glyphicon glyphicon-log-out"></span>' +
+                '@Html.ActionLink("Sign Out", "SignOut", "Home", null,
+                 new { @style= "text-align: center; border:none !important; text-decoration:none !important; font-size:1em !important; color:black !important; background:none !important;" })' +
+                '</div>' +
+            '</div>'
+        );
+        $(".navbar-brand").html('<img class="navbar-logo" src="@Url.Content("~/Images/updatedLogo.png")" alt="TAhub" style="max-width:100px; margin-top: -7px;">');
+
+    });
+    //***** Ajax Calls *****
+    //Post Ajax
+    var makePostRequest = function (data, url, onSuccess, onFailure) {
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: JSON.stringify(data),
+            dataType: "json",
+            contentType: "application/json",
+            success: onSuccess,
+            error: onFailure
+        });
+    };
+    //Delete Ajax
+    var makeDeleteRequest = function (data, url, onSuccess, onFailure) {
+        $.ajax({
+            type: 'DELETE',
+            url: url,
+            data: JSON.stringify(data),
+            dataType: "json",
+            contentType: "application/json",
+            success: onSuccess,
+            error: onFailure
+        });
+    };
+    //Get Ajax
+    var makeGetRequest = function (url, onSuccess, onFailure) {
+        $.ajax({
+            type: 'GET',
+            url: url,
+            dataType: "json",
+            contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+            success: onSuccess,
+            error: onFailure
+        });
+    };
+</script>
+<style type="text/css">
+    @@media only screen and (max-width: 420px){
+       body {
+           padding-top: 100px !important;
+       }
+    }
+    * {
+        font-family: 'Roboto', "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+    body {
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-size: cover;
+        padding-top: 80px !important;
+        min-height: 100%;
+        min-width: 100%;
+    }
+    .navbar{
+        padding: 10px 0px;
+    }
+    .navbar .navbar-collapse a {
+        margin-top: 5px;
+        font-size: 1.9em;
+        font-weight: bold;
+        color: white !important;
+        background-color: inherit;
+        border: none;
+        border-bottom: solid 3px #222 !important;
+    }
+    .navbar .navbar-left a:hover {
+        border-bottom: solid 3px darkorange !important;
+    }
+    .navbar .navbar-right a {
+        background-color: darkorange;
+        border: none;
+        padding: 10px 10px !important;
+        margin-right: 10px;
+        min-width: 150px;
+    }
+    .navbar .navbar-right a:hover{
+        background-color: rgba(255,140,0, .5) !important;
+    }
+    .alert-messages{
+        padding: 10px 5px;
+        margin: 20px 0px;
+    }
+</style>

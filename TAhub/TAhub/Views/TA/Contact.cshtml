@@ -1,0 +1,234 @@
+﻿@model TAhub.Models.MessageModel
+@using TAhub.Models
+<div class="container">
+    <h2 style="text-align:center;"><strong>Contact Your TA</strong></h2>
+    <hr />
+    @{ Model.SenderType = UserType.Student; }
+    @using (Html.BeginForm("Contact", "TA", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.SenderType)
+        <div class="form-horizontal form-body" align="center">
+            <hr class="title-bar" />
+            <div class="well well-sm">
+                <h3>Please enter your course's <a href="http://www.schedules.wsu.edu/" target="_blank">SLN</a> number to find your TA.</h3>
+            </div>
+            <!--Course's SLN-->
+            <div class="form-group" align="center">
+                <div class="col-md-10 input-group">
+                    <span class="input-group-addon">SLN</span>
+                    <input id="sln" type="text" class="form-control text-box single-line" placeholder="06549" />
+                    <span id="sln-btn" class="input-group-addon"><i class="glyphicon glyphicon-ok"></i></span>
+                </div>
+            </div>
+            <div id="message-info" style="display:none;">
+                <!--Student's TA-->
+                <div class="form-group">
+                    <div class="col-md-10 input-group">
+                        <span class="input-group-addon">Your TA</span>
+                        <select id="ta-options" class="form-control" data-val="true" data-val-required="The Major field is required." name="TA">
+                            <option selected disabled hidden>Select One...</option>
+                        </select>
+                    </div>
+                </div>
+                <!--Student's Name-->
+                <div class="form-group" align="center">
+                    <div class="col-md-10 input-group">
+                        <span class="input-group-addon">Your Name</span>
+                        @Html.EditorFor(model => model.SenderName, new { htmlAttributes = new { @class = "form-control" } })
+                    </div>
+                    @Html.ValidationMessageFor(model => model.SenderName, "", new { @id = "name-validation", @class = "text-danger" })
+                </div>
+                <!--Student's Email-->
+                <div class="form-group">
+                    <div class="col-md-10 input-group">
+                        <span class="input-group-addon">Your Email</span>
+                        @Html.EditorFor(model => model.SenderEmail, new { htmlAttributes = new { @class = "form-control" } })
+                    </div>
+                    @Html.ValidationMessageFor(model => model.SenderEmail, "", new { @id = "email-validation", @class = "text-danger" })
+                </div>
+                <!--Student's Message-->
+                <div class="form-group">
+                    <div class="col-md-10 input-group">
+                        <span class="input-group-addon">Message</span>
+                        @Html.TextAreaFor(model => model.Text, new { @style = "width: 100%", @rows = "7", @class = "form-control" })
+                    </div>
+                    @Html.ValidationMessageFor(model => model.Text, "", new { @id = "message-validation", @class = "text-danger" })
+                </div>
+                <!--Submit Button-->
+                <div class="form-group">
+                    <div class="col-md-10 input-group">
+                        <input type="submit" value="Send" class="btn btn-default create-btn" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script type="text/javascript">
+    $(function () {
+        //Background Image
+        $("body").css('background-image', 'url(@Url.Content("~/Images/BG_IMG_6.jpg"))');
+        //Incase an Issue has occured in the backend while processing the users request
+        var dangerText = '@Model.Notifications';
+        var checkText = dangerText.replace(/[^A-Z0-9]/ig, "");
+        if (checkText !== "") {
+            if (dangerText.includes("Success")) {
+                $(".alert-success h3").text(dangerText);
+                $(".alert-success").show();
+            }
+            else {
+                $(".alert-danger h3").text(dangerText);
+                $(".alert-danger").show();
+            }
+        }
+        validateInput();
+    });
+
+    $("#sln-btn").click(function () {
+        $("#sln-btn i").removeClass("glyphicon glyphicon-ok").addClass("fa fa-spinner fa-spin");
+        $("#sln-btn").prop('disabled', true);
+        var SLN = $("#sln").val();
+        $(".well h3").text("Please wait while we locate your course and its TAs");
+        var onSuccess = function (data) {
+            var jsonData = JSON.parse(data); // store json object
+            $("#sln-btn i").removeClass("fa fa-spinner fa-spin").addClass("glyphicon glyphicon-ok");
+            for (var i = 0; i < jsonData.length; i++) {
+                $("#ta-options").append("<option value=" + jsonData[i].Id + ">" + jsonData[i].Name + "</option>");
+            }
+            $(".well h3").text(jsonData[0].Course + "\n" + jsonData[0].CourseTitle);
+            $("#message-info").show();
+        };
+        var onFailure = function (data) {
+            $("#sln-btn i").removeClass("fa fa-spinner fa-spin").addClass("glyphicon glyphicon-ok");
+            $("#sln-btn").attr("disable", false);
+            $(".well h3").text("Failure to locate course with SLN: " + SLN);
+        };
+        var data = { 'CourseSLN': SLN };
+        var url = '@Url.Action(actionName: "GetTAOptions", controllerName: "TA")';
+        makePostRequest(data, url, onSuccess, onFailure);
+    });
+
+    //Validates all user Input to ensure they enter appropriate values for each input section
+    var validateInput = function () {
+        $(".create-btn").click(function (event) {
+            var isValid = true;
+            //Email Validation Variables
+            var name = $("#SenderName").val();
+            var nameHtml = $("#name-validation");
+            //Password Validation Variables
+            var email = $("#SenderEmail").val();
+            var emailHtml = $("#email-validation");
+            //First Name Validation Variables
+            var message = $("#Text").val();
+            var messageHtml = $("#message-validation");
+
+            //Sets the CSS values for the invalid input mesages displayed to the user
+            $("#email-validation, #name-validation, #message-validation").css({
+                "font-weight": "bold",
+                "color": "firebrick",
+                "background-color": "rgba(255,255,255,.7)"
+            });
+            //Name Validation Conditional
+            if (name.length === 0) {
+                isValid = false;
+                nameHtml.text("Please Enter Your Name.");
+            }
+            else {
+                nameHtml.text("");
+            }
+            //Email Validation Conditional
+            if (email.length === 0) {
+                isValid = false;
+                emailHtml.text("Please Enter Your Email.");
+            }
+            else {
+                emailHtml.text("");
+            }
+            //Text Validation Conditional
+            if (message.length < 10 || message.length > 250) {
+                isValid = false;
+                messageHtml.text("Message must be between 10 to 250 characters in length.");
+            }
+            else {
+                messageHtml.text("");
+            }
+            //If any of the above inputs had an invalid value entered, this conditional is triggered
+            if (!isValid) {
+                //Prevents the submit button from "Submitting" the form as it was intended to do
+                event.preventDefault();
+            }
+        })
+    };
+</script>
+<style type="text/css">
+    .title-bar {
+        display: block;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        margin-left: auto;
+        margin-right: auto;
+        border-style: solid;
+        border-width: 3px;
+        border-color: darkorange;
+    }
+    .form-body {
+        margin: auto;
+        width: 60%;
+    }
+    .form-group {
+        margin: 20px auto;
+        width: 50%;
+    }
+    @@media only screen and (max-width: 1000px) {
+        .form-group {
+            width: 80%;
+        }
+        .title-bar {
+            width: 100%;
+        }
+    }
+    @@media only screen and (max-width: 420px) {
+        .input-group-addon {
+            width: 32% !important;
+            font-size: .9em;
+        }
+        .form-horizontal {
+            width: 100% !important;
+        }
+        .form-group {
+            width: 100% !important;
+            margin: auto !important;
+            padding: 5px !important;
+        }
+    }
+    .input-group {
+        width: 100%;
+        margin: auto;
+    }
+    .input-group .input-group-addon {
+        width: 30%;
+    }
+    /*Create Button*/
+    .create-btn {
+        width: 40%;
+        background-color: darkorange;
+        color: white;
+        border: none;
+        font-weight: bold;
+        font-size: 1.3em;
+    }
+    /*Create Button*/
+    .create-btn:hover {
+        opacity: .5;
+        background-color: darkorange;
+    }
+    #sln-btn {
+        background-color: mediumseagreen !important;
+        color: white !important;
+        border: none !important;
+    }
+    #sln-btn:hover {
+        opacity: .5;
+    }
+</style>

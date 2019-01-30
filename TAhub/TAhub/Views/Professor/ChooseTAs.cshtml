@@ -1,0 +1,247 @@
+﻿@model TAhub.Controllers.ProfessorController.TAOptions
+@using TAhub.DB;
+
+<div class="container">
+    <h2 style="text-align:center;"><strong>Select TAs for <i>@Model.CourseName </i></strong></h2>
+    <hr />
+    @if (Model.TAs != null && Model.TAs.Count > 0)
+    {
+        <table id="dataTable" class="table table-striped table-bordered" style="width:100%; background-color: white;">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Major</th>
+                    <th>Standing</th>
+                    <th>GPA</th>
+                    <th>Experience</th>
+                    <th>Schedule</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (TeachersAssistant TA in Model.TAs)
+                {
+                    <tr id="row-@TA.Id">
+                        <td>
+                            <a class="add-btn" id="@TA.Id" name="@TA.FirstName @TA.LastName" href="#" data-toggle="tooltip" title="Add TA">
+                                <span class="glyphicon glyphicon-plus" style="color: mediumseagreen; font-size: 1.3em;"></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="#" data-toggle="popover" title="Student's Email" data-content="@TA.Email">@Html.Raw(TA.FirstName) @Html.Raw(TA.LastName)</a>
+                        </td>
+                        <td>
+                            @Html.Raw(TA.Major)
+                        </td>
+                        <td>
+                            @if (TA.Credits < 30)
+                            {
+                                @Html.Raw("Freshman")
+                            }
+                            else if (TA.Credits >= 30 && TA.Credits < 60)
+                            {
+                                @Html.Raw("Sophomore")
+                            }
+                            else if (TA.Credits >= 60 && TA.Credits < 90)
+                            {
+                                @Html.Raw("Junior")
+                            }
+                            else
+                            {
+                                @Html.Raw("Senior")
+                            }
+                        </td>
+                        <td>
+                            @Html.Raw(TA.GPA)
+                        </td>
+                        <td>
+                            @Html.Raw(TA.HasExperience ? "Yes" : "No")
+                        </td>
+                        <th>
+                            <a data-toggle="tooltip" title="View @TA.FirstName's Class Schedule">
+                                <span id="@TA.Id-schedule" name="@TA.FirstName @TA.LastName" data-toggle="modal" data-target="#scheduleModal" class="schedule-btn glyphicon glyphicon-list-alt"></span>
+                            </a>
+                        </th>
+                    </tr>
+                }
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Major</th>
+                    <th>Standing</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    }
+    else
+    {
+        <div class="well well-lg" style="font-weight: bold; text-align: center; font-size: 1.5em;">There are currently no avaliable TAs with a course preference of @Model.CourseName.</div>
+    }
+</div>
+
+<!-- Modal -->
+<div id="scheduleModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h2 class="modal-title"></h2>
+            </div>
+            <div class="modal-body">
+                <h2 id="loading-text"><i style="color:mediumseagreen; text-align:center;" class="fa fa-spinner fa-spin"></i> Loading Schedule...</h2>
+                <h4 style="display:none; color: firebrick; text-align: center;"></h4>
+                <table id="scheduleTable" class="table table-striped table-bordered" style="display: none; width:100%; background-color: white;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center; font-weight: bold;">Course</th>
+                            <th style="text-align: center; font-weight: bold;">Time (24-Hour)</th>
+                            <th style="text-align: center; font-weight: bold;">Days</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button style="float:right" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(function () {
+        //Background Image
+        $("body").css('background-image', 'url(@Url.Content("~/Images/BG_IMG_6.jpg"))');
+        InitializeDataTable();
+       //Incase an Issue has occured in the backend while processing the users request
+        var dangerText = '@Model.Notifications';
+        var checkText = dangerText.replace(/[^A-Z0-9]/ig, "");
+        if (checkText !== "") {
+            $(".alert-danger h3").text(dangerText);
+            $(".alert-danger").show();
+        }
+    });
+    $(".schedule-btn").on("click", function () {
+        var TA_Id = this.id.split("-")[0];
+        var Name = document.getElementById(TA_Id).getAttribute("name");
+        $("#scheduleModal .modal-title").text(Name + " Weekly Schedule");
+        var onSuccess = function (data) {
+            $("#loading-text").hide();
+            var formData = JSON.parse(data);
+            for (var i = 0; i < formData.length; i++) {
+                if (i == 0) {
+                    $("#scheduleTable tbody").html("<tr><td>" + formData[i].Course + "</td><td>" + formData[i].Time + "</td><td>" + formData[i].Days + "</td></tr>");
+                }
+                else {
+                    $("#scheduleTable tbody").append("<tr><td>" + formData[i].Course + "</td><td>" + formData[i].Time + "</td><td>" + formData[i].Days + "</td></tr>");
+                }
+                $("#scheduleTable tbody tr td").css({
+                    "background-color": "rgba(255,140,0,.8)",
+                    "color": "white"
+                });
+            }
+            $("#scheduleTable").show();
+        };
+        var onFailure = function (data) {
+            $("#loading-text").hide();
+            var message = "Unable to load students schedule...";
+            if (typeof data.responseJSON === 'string' || data.responseJSON instanceof String) {
+                message = data.responseJSON;
+            }
+            else if (typeof data === 'string' || data instanceof String) {
+                message = data;
+            }
+            $("#scheduleModal .modal-body h4").text(message);
+            $("#scheduleModal .modal-body h4").show();
+        };
+        var url = '@Url.Action(actionName: "GetTASchedule", controllerName: "Professor")';
+        var data = { "TA": TA_Id };
+        makePostRequest(data, url, onSuccess, onFailure);
+    });
+    $('#scheduleModal').on('hidden.bs.modal', function (e) {
+        $("#loading-text").show();
+        $("#scheduleModal .modal-title").text("");
+        $("#scheduleTable").hide();
+        $("#scheduleTable tbody").html(" ");
+        $("#scheduleModal .modal-body h4").hide();
+        $("#scheduleModal .modal-body h4").text(" ");
+    });
+    $(".add-btn").click(function () {
+        var TA_Id = this.id;
+        var name = document.getElementById(TA_Id).getAttribute("name");
+        $("#" + TA_Id + " span").removeClass("glyphicon glyphicon-plus").addClass("fa fa-spinner fa-spin");
+        $(this).prop("disabled", true);
+        var onSuccess = function (data) {
+            $(this).prop("disabled", false);
+            $("#" + TA_Id + " span").removeClass("fa fa-spinner fa-spin").addClass("glyphicon glyphicon-plus");
+            $("#row-" + TA_Id).hide();
+            $(".alert-danger").hide();
+            $(".alert-success h3").text("Successfully added " + name + " to " + '@Model.CourseName').parent().show();
+        };
+        var onFailure = function (data) {
+            $(this).prop("disabled", false);
+            $("#" + TA_Id + " span").removeClass("fa fa-spinner fa-spin").addClass("glyphicon glyphicon-plus");
+            $(".alert-success").hide();
+            $(".alert-danger h3").text("Failed added " + name + " to " + '@Model.CourseName').parent().show();
+        };
+        var url = '@Url.Action(actionName: "AddTAToCourse", controllerName: "Professor")';
+        var data = { "TA": TA_Id, "Course": '@Model.CourseId' };
+        makePostRequest(data, url, onSuccess, onFailure);
+    });
+    //Initailizes the datatable on the page
+    var InitializeDataTable = function () {
+        var id = "#dataTable";
+        $(id).DataTable({
+            responsive: true
+        });
+        $("#scheduleTable").DataTable({
+            responsive: true,
+            "paging": false,
+            "ordering": false,
+            "info": false,
+            "searching": false
+        });
+        // Setup - add a text input to each footer cell
+        $(id + ' tfoot th').each(function () {
+            var title = $(this).text();
+            if (title != "") {
+                $(this).html('<input type="text" placeholder="Search ' + title + '" />');
+            }
+        });
+        // DataTable
+        var table = $(id).DataTable();
+        // Apply the search
+        table.columns().every(function () {
+            var that = this;
+            $('input', this.footer()).on('keyup change', function () {
+                if (that.search() !== this.value) {
+                    that.search(this.value).draw();
+                }
+            });
+        });
+    };
+</script>
+<style type="text/css">
+    div.container {
+        width: 80%;
+    }
+
+    table {
+        text-align: center;
+    }
+    .glyphicon-list-alt {
+        font-size: 1.3em;
+        color: darkorange;
+        text-align: center;
+        display: block;
+        margin: auto;
+    }
+</style>

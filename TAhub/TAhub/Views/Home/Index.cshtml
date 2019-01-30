@@ -1,0 +1,121 @@
+﻿<div class="container">
+    <div class="jumbotron">
+        <div class="jumbotron-text">
+            <h1 style="color: darkorange; font-weight:bold;">Welcome to TAhub</h1>
+            <h3 class="lead">
+                With TAhub, you will easily be able to match yourself with a TA or Professor.
+                Please click the button below to learn more about how are services can benefit you.
+            </h3>
+            @Html.ActionLink("Learn More", "About", "Home", null, new { @type = "button", @class = "btn btn-primary" })
+        </div>
+    </div>
+    <audio id="TAhub-Sound" controls style="display: none;">
+        <source src="~/Sounds/TAhubSound.mp3" type="audio/mp3">
+    </audio>
+    <div class="row">
+        <div class="btn-group btn-group-justified">
+            @Html.ActionLink("Login", "Login", "Home", null, new { @type = "button", @class = "btn btn-default" })
+            @Html.ActionLink("Create TA Account", "Create", "TA", null, new { @class = "btn btn-default" })
+            @Html.ActionLink("Create Professor Account", "Create", "Professor", null, new { @class = "btn btn-default" })
+            @Html.ActionLink("Contact TA", "Contact", "TA", null, new { @type = "button", @class = "btn btn-default" })
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        //Background Image
+        $("body").css('background-image', 'url(@Url.Content("~/Images/BG_IMG_13.jpg"))');
+        var audio = $("#TAhub-Sound")[0];
+        $(".navbar-brand").mouseenter(function () {
+            audio.play();
+        });
+    });
+</script>
+
+<style>
+    @@media only screen and (max-width: 1000px) {
+        .jumbotron a{
+            width: 200px !important;
+        }
+        .btn-group a{
+            overflow: hidden !important;
+            font-size: 1.3em !important;
+        }
+    }
+    @@media only screen and (max-width: 600px){
+        .btn-group a {
+            overflow: hidden !important;
+            font-size: 1em !important;
+        }
+    }
+    @@media only screen and (max-width: 420px) {
+        .jumbotron{
+            width: 100%;
+            margin: auto !important;
+            font-size: .9em !important;
+            padding: 7px !important;
+        }
+
+        .btn-group{
+            overflow: hidden !important;
+            font-size: 1.2em !important;
+            margin: 0px !important;
+            padding: 20px!important;
+
+        }
+        .btn-group a {
+            display: block !important;
+            height: 28% !important;
+            width: 100% !important;
+            
+        }
+    }
+    .jumbotron {
+        padding: 40px;
+        text-align: center;
+        background-color: rgba(0,0,0, .8);
+    }
+    .jumbotron h3 {
+        width: 60%;
+        margin: 20px auto;
+        font-size: 1.7em;
+        color: white;
+    }
+    .jumbotron a {
+        width: 25%;
+        height: 50px;
+        text-align: center;
+        margin: auto;
+        font-weight: bold;
+        font-size: 2em;
+        background-color: rgba(255,255,255,.8) !important;
+        color: black !important;
+        border: none;
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+    }
+    .jumbotron a:hover {
+        opacity: .5;
+    }
+    .btn-group {
+        margin: auto;
+        width: 100%;
+        padding: 50px;
+        height: 200px !important;
+    }
+    .btn-group a {
+        margin: auto;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.5em;
+        background-color: rgba(255,140,0, .8) !important;
+        color: white !important;
+        height: 100%;
+        white-space: normal;
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+        border: solid 5px darkorange !important;
+    }
+    .btn-group a:hover {
+        opacity: .5;
+    }
+</style>
+

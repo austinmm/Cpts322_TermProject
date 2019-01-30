@@ -1,0 +1,112 @@
+﻿@model TAhub.Models.TAModel
+
+<div class="container">
+    <div class="jumbotron">
+        <div class="name">
+            <i style='font-size:35px' class='fas'>&#xf501;</i>
+            @Html.DisplayFor(model => model.FirstName)
+            @Html.DisplayFor(model => model.LastName)
+        </div>
+        <div class="info">
+                @if (Model.CourseAssignment == null)
+                {
+                    <div>
+                        <h2 style="display: inline">Status:</h2>
+                        <span style="color:wheat">Pending Assignment...</span>
+                    </div>
+                    <div>
+                        <h2 style="display: inline">Course:</h2>
+                        <span style="color:wheat">Unassigned...</span>
+                    </div>
+                    <div>
+                        <h2 style="display: inline">Lab:</h2>
+                        <span style="color:wheat">Unassigned...</span>
+                    </div>
+
+                }
+                else
+                {
+                    <div>
+                        <h2 style="display: inline">Status:</h2>
+                        <span style="color:darkseagreen">Teacher's Assistant</span>
+                    </div>
+                    <div>
+                        <h2 style="display: inline">Course:</h2>
+                        <span style="color:darkseagreen">@Html.DisplayFor(model => model.CourseAssignment.Prefix).ToString().Replace(" ", "_") @Html.DisplayFor(model => model.CourseAssignment.CourseNumber)</span></div>
+
+                    if (Model.Lab == null)
+                    {
+                        <div>
+                            <h2 style="display: inline">Lab:</h2>
+                            <span style="color:wheat">Unassigned...</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <h2 style="display: inline">Lab:</h2>
+                            <span style="color:darkseagreen">@Html.DisplayFor(model => model.Lab)</span>
+                        </div>
+                    }
+                }
+        </div>
+    </div>
+    <div class="btn-group btn-group-justified">
+
+        @Html.ActionLink("Messages", "Messages", "TA", null, new { @type = "button", @class = "btn btn-default" })
+        @Html.ActionLink("Account Details", "AccountDetails", "Home", new { @type = "button", @class = "btn btn-default" })
+        @Html.ActionLink("Edit Schedule", "Schedule", "TA", null, new { @class = "btn btn-default" })
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        //Background Image
+        $("body").css('background-image', 'url(@Url.Content("~/Images/BG_IMG_4.jpg"))');
+        //Incase an Issue has occured in the backend while processing the users request
+        var dangerText = '@Model.Notifications';
+        var checkText = dangerText.replace(/[^A-Z0-9]/ig, "");
+        if (checkText !== "") {
+            $(".alert-danger h3").text(dangerText);
+            $(".alert-danger").show();
+        }
+    });
+</script>
+
+<style type="text/css">
+    .name{
+        font-size: 3.5em;
+        padding-bottom: 10px;
+    }
+    .info {
+        font-size: 2em;
+        text-align:left;
+    }
+    .jumbotron {
+        text-align: center;
+        background-color: rgba(0,0,0, .7);
+        color: white;
+    }
+    .btn-group {
+        margin: auto;
+        width: 100%;
+        padding: 50px;
+        height: 200px !important;
+    }
+    .btn-group a {
+        margin: auto;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.5em;
+        background-color: rgba(255,140,0, .8) !important;
+        color: white !important;
+        height: 100%;
+        white-space: normal;
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+        border: solid 5px darkorange !important;
+    }
+    .btn-group a:hover {
+        opacity: .5;
+    }
+</style>

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TAhub", "TAhub\TAhub.csproj", "{36FA57A4-792D-438B-B41E-24AA633D0C33}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TAhub.Tests", "TAhub.Tests\TAhub.Tests.csproj", "{947F3E35-8519-4AA8-B91A-C130A90102B3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{36FA57A4-792D-438B-B41E-24AA633D0C33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36FA57A4-792D-438B-B41E-24AA633D0C33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36FA57A4-792D-438B-B41E-24AA633D0C33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36FA57A4-792D-438B-B41E-24AA633D0C33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{947F3E35-8519-4AA8-B91A-C130A90102B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{947F3E35-8519-4AA8-B91A-C130A90102B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{947F3E35-8519-4AA8-B91A-C130A90102B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{947F3E35-8519-4AA8-B91A-C130A90102B3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {329C201C-FA66-4DBD-8963-4104A5A43BCB}
+	EndGlobalSection
+EndGlobal

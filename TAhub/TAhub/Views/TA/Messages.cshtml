@@ -1,0 +1,108 @@
+﻿@model TAhub.Models.TAModel
+@using TAhub.Models;
+@using TAhub.DB;
+<div class="container">
+    <h2 style="text-align:center;"><strong>Messages: <span id="message-count" data-toggle="tooltip" title="Message Count">@Model.Messages.Count</span></strong></h2>
+    <hr />
+    @if (Model.Messages != null)
+    {
+        <div class="panel-group" id="accordion">
+            @{
+                int messageCount = 0;
+                Model.Messages.Reverse();
+            }
+            @foreach (Message message in Model.Messages)
+            {
+                if (message != null)
+                {
+                    <div class="panel panel-default" id="message-@message.Id">
+                        <div class="panel-heading">
+                            <div class="card card-body">
+                                <table class="panel-title table table-striped table-bordered " style="width:100%">
+                                    <tr>
+                                        <td class="first-col">
+                                            <a data-parent="#accordion" href="#message-@messageCount" data-toggle="collapse">
+                                                <span style="color: mediumseagreen;" data-toggle="tooltip" title="Open Message" class="glyphicon glyphicon-envelope"></span>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="#" data-toggle="popover" data-html="true" title="Sender's Email" data-content="<a href='mailto:@message.SenderEmail'>@message.SenderEmail</a>">
+                                                @Html.Raw(message.SenderName)
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span data-toggle="tooltip" title="Sender's Status">
+                                                @Html.Raw(message.SenderType)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @{ int length = message.Text.Length;}
+                                            @Html.Raw(message.Text.Substring(0, length > 20 ? 20 : length))...
+                                        </td>
+                                        <td class="delete-col">
+                                            <span id="@message.Id" style="color: firebrick;" data-toggle="tooltip" title="Delete Message" class="delete-btn glyphicon glyphicon-remove"></span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="message-@messageCount" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                @Html.Raw(message.Text)
+                            </div>
+                        </div>
+                    </div>
+                    messageCount++;
+                }
+            }
+        </div>
+    }
+    else
+    {
+        <div class="well well-lg" style="font-weight: bold; text-align: center; font-size: 1.5em;">You have no messages at this time, check back later.</div>
+    }
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //Background Image
+        $("body").css('background-image', 'url(@Url.Content("~/Images/BG_IMG_6.jpg"))');
+        //Incase an Issue has occured in the backend while processing the users request
+        var dangerText = '@Model.Notifications';
+        var checkText = dangerText.replace(/[^A-Z0-9]/ig, "");
+        if (checkText !== "") {
+            $(".alert-danger h3").text(dangerText);
+            $(".alert-danger").show();
+        }
+    });
+    $(".delete-btn").click(function () {
+        var Id = this.id;
+        $(this).removeClass("glyphicon glyphicon-remove").addClass("fa fa-spinner fa-spin");
+        var onSuccess = function (data) {
+            $(".alert-danger").hide();
+            var count = parseInt($("#message-count").text());
+            $("#message-count").text(count - 1);
+            $("#message-" + Id).hide();
+        }
+        var onFailure = function (data) {
+            $(this).removeClass("fa fa-spinner fa-spin").addClass("glyphicon glyphicon-remove");
+            $(".alert-success").hide();
+            $(".alert-danger h3").text("Failed to delete message").parent().show();
+        }
+        var data = { 'Id': Id };
+        var url = '@Url.Action(actionName: "DeleteMessage", controllerName: "TA")';
+        makeDeleteRequest(data, url, onSuccess, onFailure);
+    });
+</script>
+<style type="text/css">
+    table tr td {
+        text-align: center;
+        width: 30%;
+    }
+    table .first-col, table .delete-col {
+        width: 5%;
+    }
+    table a {
+        color: black;
+    }
+</style>
